@@ -52,9 +52,20 @@ def build_plan(
             continue
         if families and accession not in families:
             continue
-        if accession in selected and selected[accession] != row:
-            raise ValueError(f"Conflicting duplicate family rows: {accession}")
-        selected[accession] = row
+        if accession in selected:
+            # The assignment table can assign one family to multiple
+            # participants. Download it once, enabling an artifact if any
+            # selected assignment requests it.
+            for flag in (
+                "download_seed_alignment",
+                "download_covariance_model",
+                "download_family_metadata",
+                "download_pdb_structures",
+            ):
+                if _enabled(row, flag):
+                    selected[accession][flag] = "true"
+        else:
+            selected[accession] = row
     if not selected:
         raise ValueError("Acquisition selection is empty")
 

@@ -176,6 +176,11 @@ def download_materials(
             reusable = verify_artifact(data_root, artifact)["status"] == "verified"
         elif destination.is_file() and known.get("sha256"):
             reusable = sha256_file(destination) == known["sha256"]
+        # Google Docs exports can change while keeping the same URL. Always
+        # refresh this source so the local reference follows the shared doc.
+        is_task_document = url == TASK_DOCUMENT
+        if is_task_document:
+            reusable = False
         if reusable:
             counts["reused"] += 1
             logger.info("Already present: %s", destination)
@@ -197,8 +202,10 @@ def download_materials(
             and (source_dir / filename).is_file()
         ):
             candidate = source_dir / filename
-            if destination.exists() and sha256_file(destination) != sha256_file(
-                candidate
+            if (
+                not is_task_document
+                and destination.exists()
+                and sha256_file(destination) != sha256_file(candidate)
             ):
                 raise ValueError("Existing material differs from the local source")
             destination.parent.mkdir(parents=True, exist_ok=True)
@@ -245,8 +252,10 @@ def download_materials(
                         with zipfile.ZipFile(candidate) as document:
                             if "word/document.xml" not in document.namelist():
                                 raise ValueError("Drive did not return a Word document")
-                    if destination.exists() and sha256_file(destination) != sha256_file(
-                        candidate
+                    if (
+                        not is_task_document
+                        and destination.exists()
+                        and sha256_file(destination) != sha256_file(candidate)
                     ):
                         raise ValueError(
                             "Existing material differs from the supplied source"

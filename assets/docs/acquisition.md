@@ -80,9 +80,20 @@ tylko uprawnienie do jednego folderu; traktuj plik jak hasło.
    folderu, wynik odrzucamy — nie pobiera całego ZIP.
 
 ```bash
+# Version: Firefox
 mkdir -p "$HOME/.config/aminor-msa"
 chmod 700 "$HOME/.config/aminor-msa"
 uv run gdown --cookies-from-browser firefox \
+  --cookies "$HOME/.config/aminor-msa/google.cookies.txt" --json \
+  'https://drive.google.com/drive/folders/1ZFsVgR5ueOf8TyxznjYAWOPkJFGbAkzK' > /dev/null
+chmod 600 "$HOME/.config/aminor-msa/google.cookies.txt"
+uv run python -m assets.scripts.download \
+  --drive-cookies "$HOME/.config/aminor-msa/google.cookies.txt"
+
+# Version: Chrome 
+mkdir -p "$HOME/.config/aminor-msa"
+chmod 700 "$HOME/.config/aminor-msa"
+uv run gdown --cookies-from-browser chrome \
   --cookies "$HOME/.config/aminor-msa/google.cookies.txt" --json \
   'https://drive.google.com/drive/folders/1ZFsVgR5ueOf8TyxznjYAWOPkJFGbAkzK' > /dev/null
 chmod 600 "$HOME/.config/aminor-msa/google.cookies.txt"
@@ -104,6 +115,43 @@ wybraliśmy Firefox, który go nie potrzebuje. Szczegóły i obsługiwane przegl
 [oficjalna instrukcja gdown](https://github.com/wkentaro/gdown#download-still-fails-even-with-anyone-with-the-link).
 Usunięcie pliku usuwa lokalną kopię, a nie sesję Google. Jeśli plik ujawniono,
 wyloguj powiązaną sesję i usuń kopie; następnie utwórz nowy eksport.
+
+#### Ręczne pobieranie przez przeglądarkę (bez cookies) - zalecane
+
+Jeśli eksport cookies nie działa albo wolisz nie przekazywać skryptowi sesji
+Google, pobierz materiały w przeglądarce zalogowanej na konto, które ma dostęp
+do folderu. Sprawdź najpierw, czy możesz otworzyć
+[folder AminorsMSA](https://drive.google.com/drive/folders/1ZFsVgR5ueOf8TyxznjYAWOPkJFGbAkzK).
+
+1. Utwórz lokalny folder na pliki wejściowe:
+
+   ```bash
+   mkdir -p "$HOME/Downloads/aminor-materials"
+   ```
+
+2. Z folderu Google Drive pobierz trzy pliki wejściowe i zapisz je bez zmiany
+   nazw bezpośrednio w `aminor-materials`:
+   `rfam-family-student.tsv`, `Rfam.pdb` i `dssr_out_261003.zip`.
+   Archiwum DSSR ma około 2 GB, więc pobieranie może potrwać.
+3. Pobierz również dokument zadania
+   [`AminorsMSA_Main.docx`](https://docs.google.com/document/d/1ldhO9f8A3VH1H6uC1TY05Ez32zh7_08NauZ7ZgYYHHg/edit):
+   otwórz go w Google Docs, wybierz **Plik → Pobierz → Microsoft Word (.docx)**
+   i zapisz jako `AminorsMSA_Main.docx` w tym samym folderze.
+4. Sprawdź, że wszystkie cztery pliki znajdują się bezpośrednio w tym folderze,
+   a nie w dodatkowym podfolderze. Nie rozpakowuj `dssr_out_261003.zip`.
+   Następnie z katalogu głównego projektu uruchom:
+
+   ```bash
+   uv run python -m assets.scripts.download \
+     --source-dir "$HOME/Downloads/aminor-materials"
+   ```
+
+Ta komenda importuje trzy materiały źródłowe, kopiuje dokument DOCX do
+`assets/references`, tworzy manifest rodzin i pobiera pliki Rfam oraz PDB.
+Przy ponownym uruchomieniu nowy DOCX z folderu źródłowego zastępuje lokalną
+kopię dokumentu zadania; zweryfikowane materiały danych są ponownie używane.
+Nie pobieraj całego folderu jako jednego ZIP-a — importer oczekuje czterech
+plików o powyższych nazwach w podanym katalogu.
 
 Wszystkie etapy mają ten sam publiczny punkt wejścia. Kod w `assets/scripts/download/`
 jest podzielony na `sources/` (Drive i import), `manifests/` (przydziały i plan),
