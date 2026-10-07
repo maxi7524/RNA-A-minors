@@ -1,0 +1,28 @@
+[selection]
+participant = "olejnik"
+family = "RF01734"
+pdb_id = "3vrs"
+report_variant = "1"
+model_number = 1
+chain = "A"
+motif_index = 0
+
+[display]
+max_sequences = 12
+max_columns = 100
+font_size = 13
+width = 800
+height = 500
+sequence_rows = 8
+residue_rows = 80
+atom_rows = 12
+annotation_rows = 16
+start_column = 0
+stop_column = 80
+raw_report_lines = 18
+
+[loading]
+workers = 2
+prefetch = 2
+family_limit = 2
+cache_entries = 2

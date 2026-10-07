@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+tmp/
+/data/
+.drive-cookies*
+*credentials*.json
+*token*.json
+google.cookies.txt
+*cookies*.txt
+*cookies*.sqlite
